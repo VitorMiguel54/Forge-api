@@ -1,0 +1,16 @@
+C:\Projetos\Forge-api\src\Forge.Infrastructure\bin\Debug\net10.0\Forge.Infrastructure.deps.json
+C:\Projetos\Forge-api\src\Forge.Infrastructure\bin\Debug\net10.0\Forge.Infrastructure.dll
+C:\Projetos\Forge-api\src\Forge.Infrastructure\bin\Debug\net10.0\Forge.Infrastructure.pdb
+C:\Projetos\Forge-api\src\Forge.Infrastructure\bin\Debug\net10.0\Forge.Domain.dll
+C:\Projetos\Forge-api\src\Forge.Infrastructure\bin\Debug\net10.0\Forge.Domain.pdb
+C:\Projetos\Forge-api\src\Forge.Infrastructure\obj\Debug\net10.0\Forge.Infrastructure.csproj.AssemblyReference.cache
+C:\Projetos\Forge-api\src\Forge.Infrastructure\obj\Debug\net10.0\Forge.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+C:\Projetos\Forge-api\src\Forge.Infrastructure\obj\Debug\net10.0\Forge.Infrastructure.AssemblyInfoInputs.cache
+C:\Projetos\Forge-api\src\Forge.Infrastructure\obj\Debug\net10.0\Forge.Infrastructure.AssemblyInfo.cs
+C:\Projetos\Forge-api\src\Forge.Infrastructure\obj\Debug\net10.0\Forge.Infrastructure.csproj.CoreCompileInputs.cache
+C:\Projetos\Forge-api\src\Forge.Infrastructure\obj\Debug\net10.0\Forge.Infrastructure.sourcelink.json
+C:\Projetos\Forge-api\src\Forge.Infrastructure\obj\Debug\net10.0\Forge.In.9A6219FC.Up2Date
+C:\Projetos\Forge-api\src\Forge.Infrastructure\obj\Debug\net10.0\Forge.Infrastructure.dll
+C:\Projetos\Forge-api\src\Forge.Infrastructure\obj\Debug\net10.0\refint\Forge.Infrastructure.dll
+C:\Projetos\Forge-api\src\Forge.Infrastructure\obj\Debug\net10.0\Forge.Infrastructure.pdb
+C:\Projetos\Forge-api\src\Forge.Infrastructure\obj\Debug\net10.0\ref\Forge.Infrastructure.dll
