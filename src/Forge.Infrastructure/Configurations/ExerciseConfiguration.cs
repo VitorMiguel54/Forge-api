@@ -1,0 +1,41 @@
+using Forge.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace Forge.Infrastructure.Configurations;
+
+public class ExerciseConfiguration : IEntityTypeConfiguration<Exercise>
+{
+    public void Configure(EntityTypeBuilder<Exercise> builder)
+    {
+        builder.ToTable("Exercises");
+
+        builder.HasKey(exercise => exercise.Id);
+
+        builder.Property(exercise => exercise.Name)
+            .IsRequired()
+            .HasMaxLength(150);
+
+        builder.Property(exercise => exercise.Description)
+            .HasMaxLength(500);
+
+        builder.Property(exercise => exercise.MuscleGroup)
+            .HasConversion<string>()
+            .IsRequired()
+            .HasMaxLength(50);
+
+        builder.HasIndex(exercise => exercise.Name);
+        builder.HasIndex(exercise => exercise.MuscleGroup);
+
+        builder.HasOne(exercise => exercise.UserProfile)
+            .WithMany(userProfile => userProfile.Exercises)
+            .HasForeignKey(exercise => exercise.UserProfileId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Property(exercise => exercise.CreatedAt)
+            .HasConversion(DateTimeUtcConverter.Instance);
+
+        builder.Property(exercise => exercise.UpdatedAt)
+            .HasConversion(DateTimeUtcConverter.Instance);
+    }
+}
