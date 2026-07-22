@@ -1,87 +1,111 @@
-# Forge
+# Forge API
 
-Forge é uma aplicação mobile-first para acompanhamento de treinos, evolução física e gamificação.
+Backend da plataforma Forge desenvolvido com **ASP.NET Core 8**, responsável por gerenciar treinos, exercícios, conquistas, progressão do usuário e integração com o Forge Mobile e o Forge Backoffice.
 
-## Objetivo
+---
 
-Permitir que o usuário registre seus treinos, exercícios, séries, repetições e cargas, acompanhando sua evolução através de estatísticas, níveis, XP e conquistas.
+## ✨ Principais Funcionalidades
 
-## Visão do Produto
+- API RESTful
+- Clean Architecture
+- Entity Framework Core
+- SQL Server
+- Swagger / OpenAPI
+- Validação de dados
+- Testes automatizados
+- Integração com Forge Mobile e Forge Backoffice
 
-O Forge foi concebido com foco principal em dispositivos móveis. A experiência principal deve acontecer em um aplicativo mobile, pois o usuário normalmente registra informações durante ou logo após o treino.
+---
 
-O mobile proporciona uma experiência mais prática para registrar séries, cargas, peso corporal, consumo de água e sono, reduzindo atrito em momentos em que o usuário precisa de rapidez.
+## 📸 API Documentation
 
-A API será otimizada para atender um aplicativo mobile. Uma versão Web poderá existir futuramente para consultas, relatórios e administração, mas não é a prioridade do projeto.
+### Swagger Overview
 
-## Princípios de Desenvolvimento
+<p align="center">
+  <img src="assets/screenshots/home.png"
+       alt="Swagger Overview"
+       width="95%" />
+</p>
 
-* APIs devem ser pensadas primeiro para consumo mobile.
-* Evitar múltiplas requisições quando uma única resposta puder atender uma tela.
-* Priorizar respostas objetivas e rápidas.
-* Pensar sempre na experiência do usuário mobile antes da versão Web.
+---
 
-## Funcionalidades Iniciais
+### Endpoint Example
 
-* Dashboard
-* Sistema de XP
-* Sistema de níveis
-* Sistema de conquistas
-* Registro de exercícios
-* Registro de séries
-* Registro de repetições
-* Registro de cargas
-* Registro de peso corporal
-* Registro de consumo diário de água
-* Histórico de treinos
-* Comparação mensal
-* Gráficos de evolução
+<p align="center">
+  <img src="assets/screenshots/getmobilehome.png"
+       alt="Endpoint Documentation"
+       width="95%" />
+</p>
 
-## Regras Gerais
+---
 
-* O sistema não cria treinos automaticamente.
-* O sistema não substitui orientação profissional.
-* O usuário monta seus próprios treinos.
-* O usuário registra suas próprias informações.
+## 🏗️ Arquitetura
 
-## Dashboard
+```text
+Forge.Api
+├── Forge.Api              → Controllers, Middleware e Configurações
+├── Forge.Application      → Casos de uso e Serviços
+├── Forge.Domain           → Entidades e Regras de Negócio
+├── Forge.Infrastructure   → Entity Framework Core, SQL Server e Repositórios
+└── Forge.Api.Tests        → Testes Automatizados
+```
 
-Exibir:
+---
 
-* Nível
-* XP atual
-* Peso inicial
-* Peso atual
-* Quantidade de treinos
-* Sequência de dias treinando
-* Últimas conquistas
+## 🚀 Tecnologias
 
-## Tecnologias
+- ASP.NET Core 8
+- C#
+- Entity Framework Core
+- SQL Server
+- Swagger / OpenAPI
+- xUnit
+- FluentAssertions
+- Docker
 
-### Backend
+---
 
-* C#
-* ASP.NET Core Web API
-* Entity Framework Core
-* SQL Server
+## ⚙️ Configuração do Ambiente
 
-### Aplicativo Mobile
+### Pré-requisitos
 
-* Stack a definir
+- .NET SDK 8
+- SQL Server
+- Visual Studio 2022 ou Visual Studio Code
 
-### Web Futuro
+---
 
-* React
-* Tailwind CSS
+## ▶️ Executando o Projeto
 
-## Objetivo de Portfólio
+```bash
+git clone <repository-url>
 
-Demonstrar conhecimento em:
+cd Forge.Api
 
-* APIs REST
-* Arquitetura em camadas
-* SQL Server
-* Entity Framework Core
-* Regras de negócio
-* Dashboard e estatísticas
-* Integração frontend/backend
+dotnet restore
+
+dotnet ef database update
+
+dotnet run
+```
+
+---
+
+## 🧪 Executando os Testes
+
+```bash
+dotnet test
+```
+
+---
+
+## 📌 Roadmap
+
+- ✅ API para Forge Mobile
+- ✅ API para Forge Backoffice
+- ✅ Sistema de Exercícios
+- ✅ Sistema de Treinos
+- ✅ Sistema de Conquistas
+- ✅ Sistema de Progressão (XP)
+- 🔄 Autenticação JWT
+- 🔄 Deploy em Produção
