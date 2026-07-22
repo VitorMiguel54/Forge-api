@@ -4,6 +4,26 @@
 
 Atualizado em: 22/07/2026
 
+## Contrato de Historico Mobile - 22/07/2026
+
+O endpoint `GET /api/mobile/users/{userProfileId}/history` mantem limite maximo de `pageSize=50`.
+
+Decisao:
+
+* O limite de 50 foi preservado porque o Mobile usa o historico no Perfil e nos graficos como amostra recente, nao como exportacao completa.
+* Requisicoes com `pageSize` acima de 50 sao normalizadas pela API para 50.
+* Teste adicionado em `MobileHistoryServiceTests` para garantir o clamp de `pageSize=100` para `50`.
+
+Impacto:
+
+* O Forge.Mobile foi alinhado para solicitar `pageSize=50`.
+* Quando houver mais treinos concluidos do que a amostra carregada, o Mobile passa a sinalizar dados parciais nos graficos.
+
+Validacao:
+
+* `dotnet build src/Forge.Api/Forge.Api.csproj`: passou.
+* `dotnet test tests/Forge.Api.Tests/Forge.Api.Tests.csproj`: passou com 119 testes.
+
 ## Midias Administrativas de Exercicios - 22/07/2026
 
 Implementado o contrato esperado pelo Forge.Backoffice para upload e remocao de midias de exercicios.

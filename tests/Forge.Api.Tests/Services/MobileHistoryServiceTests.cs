@@ -66,6 +66,23 @@ public class MobileHistoryServiceTests
         Assert.Equal(4, workout.ExerciseCount);
     }
 
+    [Fact]
+    public async Task GetAsync_ClampsPageSizeToFifty_WhenRequestedPageSizeIsHigher()
+    {
+        var userProfileId = Guid.NewGuid();
+        var workoutRepository = new FakeWorkoutRepository(totalCompletedWorkouts: 120);
+        var service = new MobileHistoryService(
+            new FakeUserProfileRepository(userProfileExists: true),
+            workoutRepository);
+
+        var response = await service.GetAsync(userProfileId, page: 1, pageSize: 100);
+
+        Assert.NotNull(response);
+        Assert.Equal(50, response.Page.PageSize);
+        Assert.Equal(50, workoutRepository.LastTake);
+        Assert.Equal(3, response.Page.TotalPages);
+    }
+
     private sealed class FakeUserProfileRepository(bool userProfileExists) : IUserProfileRepository
     {
         public Task<IReadOnlyCollection<UserProfile>> GetAllAsync(CancellationToken cancellationToken = default)
