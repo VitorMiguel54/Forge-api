@@ -202,13 +202,80 @@ public class BackofficeExerciseServiceTests
         Assert.Null(response);
     }
 
+    [Fact]
+    public async Task UploadMediaAsync_StoresImageUrl()
+    {
+        var muscleGroupId = Guid.NewGuid();
+        var exerciseId = Guid.NewGuid();
+        var repository = new FakeExerciseRepository(CreateExercise(exerciseId, "Supino", muscleGroupId));
+        var storage = new FakeAdminImageStorage("/uploads/backoffice/exercises/supino.webp");
+        var service = CreateService(repository, CreateMuscleGroupRepository(muscleGroupId), storage);
+        await using var stream = new MemoryStream([0x52, 0x49, 0x46, 0x46, 0, 0, 0, 0, 0x57, 0x45, 0x42, 0x50]);
+
+        var response = await service.UploadMediaAsync(
+            exerciseId,
+            "image",
+            stream,
+            "supino.webp",
+            "image/webp",
+            stream.Length);
+
+        Assert.NotNull(response);
+        Assert.Equal(exerciseId, response.ExerciseId);
+        Assert.Equal("image", response.MediaType);
+        Assert.Equal("/uploads/backoffice/exercises/supino.webp", response.Url);
+        Assert.Equal("/uploads/backoffice/exercises/supino.webp", repository.Exercises.Single().ImageUrl);
+    }
+
+    [Fact]
+    public async Task DeleteMediaAsync_RemovesThumbnailUrl()
+    {
+        var muscleGroupId = Guid.NewGuid();
+        var exerciseId = Guid.NewGuid();
+        var exercise = CreateExercise(exerciseId, "Supino", muscleGroupId);
+        exercise.ThumbnailUrl = "/uploads/backoffice/exercises/supino-thumb.webp";
+        var repository = new FakeExerciseRepository(exercise);
+        var storage = new FakeAdminImageStorage();
+        var service = CreateService(repository, CreateMuscleGroupRepository(muscleGroupId), storage);
+
+        var deleted = await service.DeleteMediaAsync(exerciseId, "thumbnail");
+
+        Assert.True(deleted);
+        Assert.Null(repository.Exercises.Single().ThumbnailUrl);
+        Assert.Contains("exercises/supino-thumb.webp", storage.DeletedKeys);
+    }
+
+    [Fact]
+    public async Task UploadMediaAsync_RejectsUnsupportedMediaType()
+    {
+        var muscleGroupId = Guid.NewGuid();
+        var exerciseId = Guid.NewGuid();
+        var service = CreateService(
+            new FakeExerciseRepository(CreateExercise(exerciseId, "Supino", muscleGroupId)),
+            CreateMuscleGroupRepository(muscleGroupId));
+        await using var stream = new MemoryStream([0x47, 0x49, 0x46, 0x38, 0x39, 0x61]);
+
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() =>
+            service.UploadMediaAsync(
+                exerciseId,
+                "audio",
+                stream,
+                "demo.gif",
+                "image/gif",
+                stream.Length));
+
+        Assert.Equal("Exercise media type is not supported.", exception.Message);
+    }
+
     private static BackofficeExerciseService CreateService(
         FakeExerciseRepository exerciseRepository,
-        FakeMuscleGroupRepository muscleGroupRepository)
+        FakeMuscleGroupRepository muscleGroupRepository,
+        FakeAdminImageStorage? mediaStorage = null)
     {
         return new BackofficeExerciseService(
             exerciseRepository,
             muscleGroupRepository,
+            mediaStorage ?? new FakeAdminImageStorage(),
             new CreateBackofficeExerciseRequestValidator(),
             new UpdateBackofficeExerciseRequestValidator());
     }
@@ -416,6 +483,42 @@ public class BackofficeExerciseServiceTests
         public Task DeleteAsync(MuscleGroup muscleGroup, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
+        }
+    }
+
+    private sealed class FakeAdminImageStorage(string publicUrl = "/uploads/backoffice/exercises/media.webp") : IAdminImageStorage
+    {
+        public List<string> DeletedKeys { get; } = [];
+
+        public Task<StoredFileResult> UploadAsync(
+            Stream stream,
+            string fileName,
+            string contentType,
+            string folder,
+            CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(new StoredFileResult(
+                $"{folder}/media{Path.GetExtension(fileName)}",
+                publicUrl,
+                fileName,
+                contentType,
+                stream.Length));
+        }
+
+        public Task DeleteAsync(string storageKey, CancellationToken cancellationToken = default)
+        {
+            DeletedKeys.Add(storageKey);
+            return Task.CompletedTask;
+        }
+
+        public string? GetStorageKeyFromPublicUrl(string? publicUrl)
+        {
+            if (string.IsNullOrWhiteSpace(publicUrl) || !publicUrl.StartsWith("/uploads/backoffice/", StringComparison.OrdinalIgnoreCase))
+            {
+                return null;
+            }
+
+            return publicUrl["/uploads/backoffice/".Length..];
         }
     }
 }

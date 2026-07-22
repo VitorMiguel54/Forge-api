@@ -2,7 +2,49 @@
 
 # Forge - Estado Atual do Projeto
 
-Atualizado em: 20/07/2026
+Atualizado em: 22/07/2026
+
+## Midias Administrativas de Exercicios - 22/07/2026
+
+Implementado o contrato esperado pelo Forge.Backoffice para upload e remocao de midias de exercicios.
+
+Endpoints:
+
+* `POST /api/backoffice/exercises/{id}/media/{mediaType}`
+* `DELETE /api/backoffice/exercises/{id}/media/{mediaType}`
+* `mediaType` aceito: `image`, `thumbnail`, `gif`, `video`.
+* Upload usa `multipart/form-data` com campo `file`.
+* Retorno do upload: `exerciseId`, `mediaType`, `url`, `contentType`, `fileSize` e `updatedAt`.
+
+Persistencia e storage:
+
+* As URLs publicas sao persistidas nos campos ja existentes de `Exercise`: `ImageUrl`, `ThumbnailUrl`, `GifUrl` e `VideoUrl`.
+* Nao foi criada migration porque o modelo ja possuia os campos necessarios.
+* A API reutiliza a abstracao existente `IAdminImageStorage` e a implementacao atual `LocalAdminImageStorage`.
+* A remocao/substituicao deriva a chave de storage a partir da URL publica quando a URL pertence ao storage local configurado.
+* Produção futura: substituir `IAdminImageStorage` por provedor externo, como R2/Azure Blob/S3, e manter o mesmo contrato HTTP.
+
+Validacoes:
+
+* Imagem principal: PNG, JPG/JPEG e WebP ate 5 MB.
+* Thumbnail: PNG, JPG/JPEG e WebP ate 2 MB.
+* GIF: GIF ate 15 MB.
+* Video: MP4 ou WebM ate 50 MB.
+* Validacao inclui extensao, content-type e assinatura basica do arquivo.
+
+Arquivos principais:
+
+* `BackofficeExercisesController`
+* `BackofficeExerciseService`
+* `IBackofficeExerciseService`
+* `BackofficeExerciseMediaUploadResponse`
+* `AdminExerciseMediaUploadValidator`
+* `IAdminImageStorage`
+* `LocalAdminImageStorage`
+
+Observacao:
+
+* O contrato foi implementado sem adicionar Cloudflare R2, Azure Blob ou outro provedor externo, pois ja havia abstracao de storage local configurada na API.
 
 ## Ordenacao Persistente de Treinos Salvos - 20/07/2026
 

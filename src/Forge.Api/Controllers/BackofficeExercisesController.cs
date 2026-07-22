@@ -9,6 +9,7 @@ namespace Forge.Api.Controllers;
 public class BackofficeExercisesController(IBackofficeExerciseService exerciseService) : ControllerBase
 {
     private const string GetBackofficeExerciseByIdRouteName = "GetBackofficeExerciseById";
+    private const int MaxMediaUploadRequestBytes = 51 * 1024 * 1024;
 
     [HttpGet]
     public async Task<ActionResult<BackofficeExerciseListResponse>> GetAsync(
@@ -98,6 +99,53 @@ public class BackofficeExercisesController(IBackofficeExerciseService exerciseSe
     {
         var deleted = await exerciseService.DeleteAsync(id, cancellationToken);
         if (!deleted)
+        {
+            return NotFound();
+        }
+
+        return NoContent();
+    }
+
+    [HttpPost("{id:guid}/media/{mediaType}")]
+    [Consumes("multipart/form-data")]
+    [RequestSizeLimit(MaxMediaUploadRequestBytes)]
+    public async Task<ActionResult<BackofficeExerciseMediaUploadResponse>> UploadMediaAsync(
+        Guid id,
+        string mediaType,
+        IFormFile file,
+        CancellationToken cancellationToken)
+    {
+        if (file is null)
+        {
+            return BadRequest();
+        }
+
+        await using var stream = file.OpenReadStream();
+        var result = await exerciseService.UploadMediaAsync(
+            id,
+            mediaType,
+            stream,
+            file.FileName,
+            file.ContentType,
+            file.Length,
+            cancellationToken);
+
+        if (result is null)
+        {
+            return NotFound();
+        }
+
+        return Ok(result);
+    }
+
+    [HttpDelete("{id:guid}/media/{mediaType}")]
+    public async Task<IActionResult> DeleteMediaAsync(
+        Guid id,
+        string mediaType,
+        CancellationToken cancellationToken)
+    {
+        var deleted = await exerciseService.DeleteMediaAsync(id, mediaType, cancellationToken);
+        if (deleted is null)
         {
             return NotFound();
         }

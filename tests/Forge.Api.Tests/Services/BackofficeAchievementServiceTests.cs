@@ -580,6 +580,16 @@ public class BackofficeAchievementServiceTests
             DeletedKeys.Add(storageKey);
             return Task.CompletedTask;
         }
+
+        public string? GetStorageKeyFromPublicUrl(string? publicUrl)
+        {
+            if (string.IsNullOrWhiteSpace(publicUrl) || !publicUrl.StartsWith("/uploads/backoffice/", StringComparison.OrdinalIgnoreCase))
+            {
+                return null;
+            }
+
+            return publicUrl["/uploads/backoffice/".Length..];
+        }
     }
 
     private sealed class FakeWorkoutRepository(int completedWorkouts) : IWorkoutRepository

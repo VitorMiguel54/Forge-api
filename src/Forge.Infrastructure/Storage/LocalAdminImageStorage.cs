@@ -54,6 +54,22 @@ public class LocalAdminImageStorage(IOptions<AdminImageStorageOptions> options) 
         return Task.CompletedTask;
     }
 
+    public string? GetStorageKeyFromPublicUrl(string? publicUrl)
+    {
+        if (string.IsNullOrWhiteSpace(publicUrl))
+        {
+            return null;
+        }
+
+        var publicBasePath = options.PublicBasePath.TrimEnd('/');
+        if (!publicUrl.StartsWith(publicBasePath + "/", StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+
+        return NormalizeRelativePath(publicUrl[publicBasePath.Length..]);
+    }
+
     private string GetSafeAbsolutePath(string storageKey)
     {
         var root = Path.GetFullPath(options.RootPath);

@@ -12,4 +12,6 @@ public interface IAdminImageStorage
         CancellationToken cancellationToken = default);
 
     Task DeleteAsync(string storageKey, CancellationToken cancellationToken = default);
+
+    string? GetStorageKeyFromPublicUrl(string? publicUrl);
 }

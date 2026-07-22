@@ -10,6 +10,7 @@ namespace Forge.Application.Services;
 public class BackofficeExerciseService(
     IExerciseRepository exerciseRepository,
     IMuscleGroupRepository muscleGroupRepository,
+    IAdminImageStorage mediaStorage,
     IValidator<CreateBackofficeExerciseRequest> createValidator,
     IValidator<UpdateBackofficeExerciseRequest> updateValidator) : IBackofficeExerciseService
 {
@@ -166,6 +167,95 @@ public class BackofficeExerciseService(
         return await GetByIdAsync(id, cancellationToken);
     }
 
+    public async Task<BackofficeExerciseMediaUploadResponse?> UploadMediaAsync(
+        Guid id,
+        string mediaType,
+        Stream stream,
+        string fileName,
+        string contentType,
+        long fileSize,
+        CancellationToken cancellationToken = default)
+    {
+        if (id == Guid.Empty)
+        {
+            return null;
+        }
+
+        var normalizedMediaType = AdminExerciseMediaUploadValidator.NormalizeMediaType(mediaType);
+        AdminExerciseMediaUploadValidator.Validate(normalizedMediaType, fileName, contentType, fileSize, stream);
+
+        var exercise = await exerciseRepository.GetByIdAsync(id, cancellationToken);
+        if (exercise is null)
+        {
+            return null;
+        }
+
+        var previousStorageKey = mediaStorage.GetStorageKeyFromPublicUrl(GetMediaUrl(exercise, normalizedMediaType));
+        var storedFile = await mediaStorage.UploadAsync(
+            stream,
+            fileName,
+            contentType,
+            $"exercises/{id}/{normalizedMediaType}",
+            cancellationToken);
+
+        try
+        {
+            SetMediaUrl(exercise, normalizedMediaType, storedFile.PublicUrl);
+            exercise.UpdatedAt = DateTime.UtcNow;
+
+            await exerciseRepository.UpdateAsync(exercise, cancellationToken);
+        }
+        catch
+        {
+            await mediaStorage.DeleteAsync(storedFile.StorageKey, cancellationToken);
+            throw;
+        }
+
+        if (!string.IsNullOrWhiteSpace(previousStorageKey))
+        {
+            await mediaStorage.DeleteAsync(previousStorageKey, cancellationToken);
+        }
+
+        return new BackofficeExerciseMediaUploadResponse(
+            exercise.Id,
+            normalizedMediaType,
+            storedFile.PublicUrl,
+            storedFile.ContentType,
+            storedFile.FileSize,
+            exercise.UpdatedAt);
+    }
+
+    public async Task<bool?> DeleteMediaAsync(
+        Guid id,
+        string mediaType,
+        CancellationToken cancellationToken = default)
+    {
+        if (id == Guid.Empty)
+        {
+            return null;
+        }
+
+        var normalizedMediaType = AdminExerciseMediaUploadValidator.NormalizeMediaType(mediaType);
+        var exercise = await exerciseRepository.GetByIdAsync(id, cancellationToken);
+        if (exercise is null)
+        {
+            return null;
+        }
+
+        var previousStorageKey = mediaStorage.GetStorageKeyFromPublicUrl(GetMediaUrl(exercise, normalizedMediaType));
+        SetMediaUrl(exercise, normalizedMediaType, null);
+        exercise.UpdatedAt = DateTime.UtcNow;
+
+        await exerciseRepository.UpdateAsync(exercise, cancellationToken);
+
+        if (!string.IsNullOrWhiteSpace(previousStorageKey))
+        {
+            await mediaStorage.DeleteAsync(previousStorageKey, cancellationToken);
+        }
+
+        return true;
+    }
+
     public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
     {
         if (id == Guid.Empty)
@@ -256,5 +346,38 @@ public class BackofficeExerciseService(
     private static string? NormalizeOptionalText(string? value)
     {
         return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+    }
+
+    private static string? GetMediaUrl(Exercise exercise, string mediaType)
+    {
+        return mediaType switch
+        {
+            "image" => exercise.ImageUrl,
+            "thumbnail" => exercise.ThumbnailUrl,
+            "gif" => exercise.GifUrl,
+            "video" => exercise.VideoUrl,
+            _ => throw new ArgumentException("Exercise media type is not supported.")
+        };
+    }
+
+    private static void SetMediaUrl(Exercise exercise, string mediaType, string? url)
+    {
+        switch (mediaType)
+        {
+            case "image":
+                exercise.ImageUrl = url;
+                break;
+            case "thumbnail":
+                exercise.ThumbnailUrl = url;
+                break;
+            case "gif":
+                exercise.GifUrl = url;
+                break;
+            case "video":
+                exercise.VideoUrl = url;
+                break;
+            default:
+                throw new ArgumentException("Exercise media type is not supported.");
+        }
     }
 }
