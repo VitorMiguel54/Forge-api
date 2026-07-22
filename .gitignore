@@ -33,6 +33,7 @@ project.assets.json
 
 # Logs
 *.log
+forge-api-test*.log
 
 # Environment files
 .env
